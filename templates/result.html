@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recognition Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .result-image {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            display: block;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .stats h2 {
+            color: #764ba2;
+            margin-bottom: 15px;
+        }
+        
+        .face-list {
+            list-style: none;
+        }
+        
+        .face-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .face-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        
+        .face-location {
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        .back-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .back-button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .no-faces {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✅ Recognition Results</h1>
+        
+        <div class="stats">
+            <h2>Found {{ num_faces }} Face(s)</h2>
+        </div>
+        
+        {% if result_image %}
+        <img src="{{ url_for('static', filename='results/' + result_image) }}" alt="Result" class="result-image">
+        {% endif %}
+        
+        {% if results %}
+            <ul class="face-list">
+                {% for face in results %}
+                    <li class="face-item">
+                        <div class="face-name">
+                            {% if face.name == "Unknown" %}
+                                ❓ {{ face.name }}
+                            {% else %}
+                                ✓ {{ face.name }}
+                            {% endif %}
+                        </div>
+                        <div class="face-location">📍 {{ face.location }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <div class="no-faces">
+                <h3>No faces detected in this image</h3>
+            </div>
+        {% endif %}
+        
+        <div style="text-align: center;">
+            <a href="/" class="back-button">⬅️ Back to Upload</a>
+        </div>
+    </div>
+</body>
+</html>

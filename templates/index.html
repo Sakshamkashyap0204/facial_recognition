@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .section h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f0f0ff;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-label {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .file-label:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .flash-message {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .file-name {
+            margin-top: 15px;
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Face Recognition System</h1>
+        <p class="subtitle">Upload an image to detect and recognize faces</p>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="flash-message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Add Known Face Section -->
+        <div class="section">
+            <h2>📝 Step 1: Add Known Faces (Optional)</h2>
+            <p style="margin-bottom: 20px; color: #666;">First, add photos of people you want to recognize</p>
+            <form method="POST" action="/add_known_face" enctype="multipart/form-data">
+                <input type="text" name="name" placeholder="Enter person's name (e.g., John Doe)" required>
+                <div class="upload-area">
+                    <label for="known-face-file" class="file-label">
+                        📁 Choose Photo
+                    </label>
+                    <input type="file" id="known-face-file" name="file" accept="image/*" required onchange="showFileName(this, 'known-file-name')">
+                    <div id="known-file-name" class="file-name"></div>
+                </div>
+                <button type="submit">➕ Add to Known Faces</button>
+            </form>
+            <div class="info">
+                💡 Tip: Upload clear photos with visible faces. The filename will be used as the person's name.
+            </div>
+        </div>
+        
+        <!-- Recognize Faces Section -->
+        <div class="section">
+            <h2>🎯 Step 2: Recognize Faces</h2>
+            <p style="margin-bottom: 20px; color: #666;">Upload an image to detect and identify faces</p>
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <div class="upload-area">
+                    <label for="upload-file" class="file-label">
+                        📷 Choose Image
+                    </label>
+                    <input type="file" id="upload-file" name="file" accept="image/*" required onchange="showFileName(this, 'upload-file-name')">
+                    <div id="upload-file-name" class="file-name"></div>
+                </div>
+                <button type="submit">🔍 Recognize Faces</button>
+            </form>
+        </div>
+
+        <!-- Webcam Capture Section -->
+        <div class="section">
+            <h2>📹 Step 3: Use Webcam</h2>
+            <p style="margin-bottom: 20px; color: #666;">Capture a photo from your webcam and recognize faces</p>
+            
+            <div style="text-align: center;">
+                <video id="webcam" autoplay playsinline style="width: 100%; max-width: 640px; border-radius: 10px; display: none;"></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                <img id="captured-image" style="width: 100%; max-width: 640px; border-radius: 10px; display: none; margin-bottom: 20px;">
+                
+                <div style="margin-top: 20px;">
+                    <button id="start-webcam" onclick="startWebcam()">📹 Start Webcam</button>
+                    <button id="capture-btn" onclick="captureImage()" style="display: none;">📸 Capture & Recognize</button>
+                    <button id="retake-btn" onclick="retakePhoto()" style="display: none; background: #ff6b6b;">🔄 Retake</button>
+                </div>
+                
+                <div id="webcam-results" style="margin-top: 20px; display: none;">
+                    <h3 style="color: #667eea;">Recognition Results:</h3>
+                    <div id="results-content" style="background: white; padding: 20px; border-radius: 10px; margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showFileName(input, displayId) {
+            const display = document.getElementById(displayId);
+            if (input.files && input.files[0]) {
+                display.textContent = '✓ Selected: ' + input.files[0].name;
+            }
+        }
+
+        let stream = null;
+        const video = document.getElementById('webcam');
+        const canvas = document.getElementById('canvas');
+        const capturedImage = document.getElementById('captured-image');
+        const startBtn = document.getElementById('start-webcam');
+        const captureBtn = document.getElementById('capture-btn');
+        const retakeBtn = document.getElementById('retake-btn');
+        const resultsDiv = document.getElementById('webcam-results');
+
+        async function startWebcam() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = stream;
+                video.style.display = 'block';
+                capturedImage.style.display = 'none';
+                startBtn.style.display = 'none';
+                captureBtn.style.display = 'inline-block';
+                resultsDiv.style.display = 'none';
+            } catch (err) {
+                alert('Error accessing webcam: ' + err.message);
+            }
+        }
+
+        function captureImage() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg');
+            capturedImage.src = imageData;
+            capturedImage.style.display = 'block';
+            video.style.display = 'none';
+            captureBtn.style.display = 'none';
+            retakeBtn.style.display = 'inline-block';
+            
+            // Stop webcam
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            // Send to server for recognition
+            recognizeFaces(imageData);
+        }
+
+        function retakePhoto() {
+            capturedImage.style.display = 'none';
+            retakeBtn.style.display = 'none';
+            startBtn.style.display = 'inline-block';
+            resultsDiv.style.display = 'none';
+        }
+
+        async function recognizeFaces(imageData) {
+            try {
+                const response = await fetch('/webcam_capture', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ image: imageData })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (err) {
+                alert('Error recognizing faces: ' + err.message);
+            }
+        }
+
+        function displayResults(data) {
+            const resultsContent = document.getElementById('results-content');
+            
+            let html = `<p style="font-size: 18px; margin-bottom: 15px;"><strong>Faces Detected: ${data.num_faces}</strong></p>`;
+            
+            if (data.num_faces > 0) {
+                html += '<div style="text-align: left;">';
+                data.results.forEach((result, index) => {
+                    html += `
+                        <div style="padding: 10px; margin: 10px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${result.name === 'Unknown' ? '#ff6b6b' : '#51cf66'};">
+                            <strong>Face ${index + 1}:</strong> ${result.name}<br>
+                            <small style="color: #666;">${result.location}</small>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                html += `<img src="/static/results/${data.result_image}" style="width: 100%; border-radius: 10px; margin-top: 15px;">`;
+            } else {
+                html += '<p style="color: #ff6b6b;">No faces detected in the image.</p>';
+            }
+            
+            resultsContent.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
