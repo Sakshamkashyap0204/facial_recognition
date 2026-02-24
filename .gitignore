@@ -58,3 +58,10 @@ test_*.py
 app_old.py
 app_broken.py
 test_img.jpg
+
+# Large files
+*.dat
+*.zip
+*.tar.gz
+face_recognition/models/
+archive*.zip
