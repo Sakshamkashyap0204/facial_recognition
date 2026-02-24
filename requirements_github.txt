@@ -1,0 +1,8 @@
+deepface>=0.0.98
+tensorflow>=2.20.0
+tf-keras>=2.20.0
+opencv-python>=4.8.0
+Flask>=3.0.0
+numpy>=1.24.0
+Pillow>=10.0.0
+werkzeug>=3.0.0
