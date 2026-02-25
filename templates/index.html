@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Face Recognition System</title>
+    <title>Criminal Record Detection System</title>
     <style>
         * {
             margin: 0;
@@ -13,13 +13,13 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -28,7 +28,7 @@
         }
         
         h1 {
-            color: #667eea;
+            color: #1e3c72;
             text-align: center;
             margin-bottom: 10px;
             font-size: 2.5em;
@@ -38,74 +38,60 @@
             text-align: center;
             color: #666;
             margin-bottom: 40px;
+            font-size: 1.1em;
         }
         
-        .section {
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
             margin-bottom: 40px;
-            padding: 30px;
+        }
+        
+        .option-card {
             background: #f8f9fa;
+            padding: 30px;
             border-radius: 15px;
+            border: 3px solid #1e3c72;
         }
         
-        .section h2 {
-            color: #764ba2;
+        .option-card h2 {
+            color: #1e3c72;
             margin-bottom: 20px;
-            font-size: 1.5em;
+            font-size: 1.8em;
         }
         
-        .upload-area {
-            border: 3px dashed #667eea;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            background: white;
-            transition: all 0.3s;
+        .form-group {
+            margin-bottom: 15px;
         }
         
-        .upload-area:hover {
-            border-color: #764ba2;
-            background: #f0f0ff;
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
         }
         
-        input[type="file"] {
-            display: none;
-        }
-        
-        .file-label {
-            display: inline-block;
-            padding: 15px 30px;
-            background: #667eea;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s;
-        }
-        
-        .file-label:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        input[type="text"] {
+        input[type="text"],
+        input[type="file"],
+        textarea,
+        select {
             width: 100%;
             padding: 12px;
-            margin: 10px 0;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
         }
         
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
+        textarea {
+            min-height: 80px;
+            resize: vertical;
         }
         
         button {
             width: 100%;
             padding: 15px;
-            background: #667eea;
+            background: #1e3c72;
             color: white;
             border: none;
             border-radius: 8px;
@@ -116,9 +102,23 @@
         }
         
         button:hover {
-            background: #764ba2;
+            background: #2a5298;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .webcam-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        video, canvas, #captured-image {
+            max-width: 100%;
+            border-radius: 10px;
+            margin: 20px 0;
         }
         
         .flash-message {
@@ -130,25 +130,36 @@
             border: 1px solid #c3e6cb;
         }
         
-        .file-name {
-            margin-top: 15px;
-            color: #667eea;
-            font-weight: bold;
+        .webcam-results {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
         }
         
-        .info {
-            background: #e7f3ff;
+        .criminal-info {
+            text-align: left;
+            background: #fff3cd;
             padding: 15px;
             border-radius: 8px;
-            margin-top: 20px;
-            color: #004085;
+            margin: 10px 0;
+            border-left: 4px solid #ff0000;
+        }
+        
+        .unknown-info {
+            background: #f8d7da;
+            padding: 20px;
+            border-radius: 8px;
+            color: #721c24;
+            font-size: 1.2em;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🔍 Face Recognition System</h1>
-        <p class="subtitle">Upload an image to detect and recognize faces</p>
+        <h1>🚨 Criminal Record Detection System</h1>
+        <p class="subtitle">Advanced Face Recognition for Law Enforcement</p>
         
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -158,74 +169,109 @@
             {% endif %}
         {% endwith %}
         
-        <!-- Add Known Face Section -->
-        <div class="section">
-            <h2>📝 Step 1: Add Known Faces (Optional)</h2>
-            <p style="margin-bottom: 20px; color: #666;">First, add photos of people you want to recognize</p>
-            <form method="POST" action="/add_known_face" enctype="multipart/form-data">
-                <input type="text" name="name" placeholder="Enter person's name (e.g., John Doe)" required>
-                <div class="upload-area">
-                    <label for="known-face-file" class="file-label">
-                        📁 Choose Photo
-                    </label>
-                    <input type="file" id="known-face-file" name="file" accept="image/*" required onchange="showFileName(this, 'known-file-name')">
-                    <div id="known-file-name" class="file-name"></div>
+        <div class="options">
+            <!-- OPTION 1: Register Criminal -->
+            <div class="option-card">
+                <h2>📝 Register Criminal</h2>
+                <form method="POST" action="/register_criminal" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Name *</label>
+                        <input type="text" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Crime</label>
+                        <input type="text" name="crime" placeholder="e.g., Murder, Theft">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Crime Details</label>
+                        <textarea name="crime_details" placeholder="Detailed description of crimes"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Years in Prison</label>
+                        <input type="text" name="years_in_prison" placeholder="e.g., Life imprisonment, 10 years">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="status">
+                            <option value="Unknown">Unknown</option>
+                            <option value="Imprisoned">Imprisoned</option>
+                            <option value="Fugitive">Fugitive</option>
+                            <option value="Dead">Dead</option>
+                            <option value="Executed">Executed</option>
+                            <option value="Alive">Alive</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nationality</label>
+                        <input type="text" name="nationality" placeholder="e.g., Indian">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" name="location" placeholder="Last known location">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea name="description" placeholder="Additional information"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Upload Image *</label>
+                        <input type="file" name="image" accept="image/*" required>
+                    </div>
+                    
+                    <button type="submit">➕ Register Criminal</button>
+                </form>
+            </div>
+            
+            <!-- OPTION 2: Check Criminal -->
+            <div class="option-card">
+                <h2>🔍 Check Criminal</h2>
+                <form method="POST" action="/check_criminal" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label>Upload Image</label>
+                        <input type="file" name="image" accept="image/*" required>
+                    </div>
+                    
+                    <button type="submit">🔍 Check Criminal Record</button>
+                </form>
+                
+                <div style="margin: 20px 0; text-align: center; color: #666;">
+                    <strong>OR</strong>
                 </div>
-                <button type="submit">➕ Add to Known Faces</button>
-            </form>
-            <div class="info">
-                💡 Tip: Upload clear photos with visible faces. The filename will be used as the person's name.
+                
+                <a href="/criminals" style="display: block; text-align: center; padding: 15px; background: #28a745; color: white; text-decoration: none; border-radius: 8px; margin-top: 10px;">
+                    📋 View All Criminals
+                </a>
             </div>
         </div>
         
-        <!-- Recognize Faces Section -->
-        <div class="section">
-            <h2>🎯 Step 2: Recognize Faces</h2>
-            <p style="margin-bottom: 20px; color: #666;">Upload an image to detect and identify faces</p>
-            <form method="POST" action="/upload" enctype="multipart/form-data">
-                <div class="upload-area">
-                    <label for="upload-file" class="file-label">
-                        📷 Choose Image
-                    </label>
-                    <input type="file" id="upload-file" name="file" accept="image/*" required onchange="showFileName(this, 'upload-file-name')">
-                    <div id="upload-file-name" class="file-name"></div>
-                </div>
-                <button type="submit">🔍 Recognize Faces</button>
-            </form>
-        </div>
-
-        <!-- Webcam Capture Section -->
-        <div class="section">
-            <h2>📹 Step 3: Use Webcam</h2>
-            <p style="margin-bottom: 20px; color: #666;">Capture a photo from your webcam and recognize faces</p>
+        <!-- Webcam Section -->
+        <div class="webcam-section">
+            <h2>📹 Webcam Check</h2>
+            <p style="margin-bottom: 20px; color: #666;">Capture photo from webcam to check criminal records</p>
             
-            <div style="text-align: center;">
-                <video id="webcam" autoplay playsinline style="width: 100%; max-width: 640px; border-radius: 10px; display: none;"></video>
-                <canvas id="canvas" style="display: none;"></canvas>
-                <img id="captured-image" style="width: 100%; max-width: 640px; border-radius: 10px; display: none; margin-bottom: 20px;">
-                
-                <div style="margin-top: 20px;">
-                    <button id="start-webcam" onclick="startWebcam()">📹 Start Webcam</button>
-                    <button id="capture-btn" onclick="captureImage()" style="display: none;">📸 Capture & Recognize</button>
-                    <button id="retake-btn" onclick="retakePhoto()" style="display: none; background: #ff6b6b;">🔄 Retake</button>
-                </div>
-                
-                <div id="webcam-results" style="margin-top: 20px; display: none;">
-                    <h3 style="color: #667eea;">Recognition Results:</h3>
-                    <div id="results-content" style="background: white; padding: 20px; border-radius: 10px; margin-top: 10px;"></div>
-                </div>
+            <video id="webcam" autoplay playsinline style="display: none; max-width: 640px;"></video>
+            <canvas id="canvas" style="display: none;"></canvas>
+            <img id="captured-image" style="display: none; max-width: 640px;">
+            
+            <div>
+                <button id="start-webcam" onclick="startWebcam()">📹 Start Webcam</button>
+                <button id="capture-btn" onclick="captureImage()" style="display: none;">📸 Capture & Check</button>
+                <button id="retake-btn" onclick="retakePhoto()" style="display: none; background: #dc3545;">🔄 Retake</button>
             </div>
+            
+            <div id="webcam-results" class="webcam-results" style="display: none;"></div>
         </div>
     </div>
     
     <script>
-        function showFileName(input, displayId) {
-            const display = document.getElementById(displayId);
-            if (input.files && input.files[0]) {
-                display.textContent = '✓ Selected: ' + input.files[0].name;
-            }
-        }
-
         let stream = null;
         const video = document.getElementById('webcam');
         const canvas = document.getElementById('canvas');
@@ -237,9 +283,7 @@
 
         async function startWebcam() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 640, height: 480 } 
-                });
+                stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
                 video.srcObject = stream;
                 video.style.display = 'block';
                 capturedImage.style.display = 'none';
@@ -264,13 +308,11 @@
             captureBtn.style.display = 'none';
             retakeBtn.style.display = 'inline-block';
             
-            // Stop webcam
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
             }
             
-            // Send to server for recognition
-            recognizeFaces(imageData);
+            checkCriminal(imageData);
         }
 
         function retakePhoto() {
@@ -280,50 +322,60 @@
             resultsDiv.style.display = 'none';
         }
 
-        async function recognizeFaces(imageData) {
+        async function checkCriminal(imageData) {
             try {
-                const response = await fetch('/webcam_capture', {
+                const response = await fetch('/webcam_check', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ image: imageData })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    displayResults(data);
+                    displayResults(data.result, data.result_image);
                 } else {
                     alert('Error: ' + data.error);
                 }
             } catch (err) {
-                alert('Error recognizing faces: ' + err.message);
+                alert('Error: ' + err.message);
             }
         }
 
-        function displayResults(data) {
-            const resultsContent = document.getElementById('results-content');
+        function displayResults(result, resultImage) {
+            let html = '';
             
-            let html = `<p style="font-size: 18px; margin-bottom: 15px;"><strong>Faces Detected: ${data.num_faces}</strong></p>`;
-            
-            if (data.num_faces > 0) {
-                html += '<div style="text-align: left;">';
-                data.results.forEach((result, index) => {
-                    html += `
-                        <div style="padding: 10px; margin: 10px 0; background: #f8f9fa; border-radius: 8px; border-left: 4px solid ${result.name === 'Unknown' ? '#ff6b6b' : '#51cf66'};">
-                            <strong>Face ${index + 1}:</strong> ${result.name}<br>
-                            <small style="color: #666;">${result.location}</small>
-                        </div>
-                    `;
+            if (result.faces && result.faces.length > 0) {
+                result.faces.forEach((face, index) => {
+                    if (face.found) {
+                        html += `
+                            <div class="criminal-info">
+                                <h3 style="color: #dc3545; margin-bottom: 10px;">⚠️ CRIMINAL IDENTIFIED</h3>
+                                <p><strong>Name:</strong> ${face.name}</p>
+                                <p><strong>Crime:</strong> ${face.crime}</p>
+                                <p><strong>Status:</strong> ${face.status}</p>
+                                <p><strong>Location:</strong> ${face.location}</p>
+                                <p><strong>Nationality:</strong> ${face.nationality}</p>
+                                <p><strong>Description:</strong> ${face.description}</p>
+                                <p><strong>Confidence:</strong> ${(face.confidence * 100).toFixed(2)}%</p>
+                            </div>
+                        `;
+                    } else {
+                        html += `
+                            <div class="unknown-info">
+                                ❌ UNKNOWN FACE<br>
+                                NO CRIMINAL RECORD FOUND IN DATABASE
+                            </div>
+                        `;
+                    }
                 });
-                html += '</div>';
-                html += `<img src="/static/results/${data.result_image}" style="width: 100%; border-radius: 10px; margin-top: 15px;">`;
+                
+                html += `<img src="/static/results/${resultImage}" style="width: 100%; border-radius: 10px; margin-top: 15px;">`;
             } else {
-                html += '<p style="color: #ff6b6b;">No faces detected in the image.</p>';
+                html = '<div class="unknown-info">No faces detected</div>';
             }
             
-            resultsContent.innerHTML = html;
+            resultsDiv.innerHTML = html;
             resultsDiv.style.display = 'block';
         }
     </script>

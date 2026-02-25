@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recognition Results</title>
+    <title>Criminal Check Results</title>
     <style>
         * {
             margin: 0;
@@ -13,7 +13,7 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -28,7 +28,7 @@
         }
         
         h1 {
-            color: #667eea;
+            color: #1e3c72;
             text-align: center;
             margin-bottom: 30px;
         }
@@ -42,47 +42,62 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
-        .stats {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 30px;
-            text-align: center;
+        .criminal-card {
+            background: #fff3cd;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 5px solid #dc3545;
         }
         
-        .stats h2 {
-            color: #764ba2;
+        .criminal-card h2 {
+            color: #dc3545;
             margin-bottom: 15px;
         }
         
-        .face-list {
-            list-style: none;
+        .info-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
         }
         
-        .face-item {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
+        .info-row:last-child {
+            border-bottom: none;
         }
         
-        .face-name {
-            font-size: 1.2em;
+        .info-label {
             font-weight: bold;
-            color: #667eea;
-            margin-bottom: 5px;
+            color: #333;
+            display: inline-block;
+            width: 180px;
         }
         
-        .face-location {
+        .info-value {
             color: #666;
-            font-size: 0.9em;
+        }
+        
+        .unknown-card {
+            background: #d1ecf1;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #17a2b8;
+        }
+        
+        .unknown-card h2 {
+            color: #0c5460;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .unknown-card p {
+            color: #0c5460;
+            font-size: 1.2em;
         }
         
         .back-button {
             display: inline-block;
             padding: 15px 30px;
-            background: #667eea;
+            background: #1e3c72;
             color: white;
             text-decoration: none;
             border-radius: 8px;
@@ -91,53 +106,100 @@
         }
         
         .back-button:hover {
-            background: #764ba2;
+            background: #2a5298;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
-        .no-faces {
+        .stats {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
             text-align: center;
-            padding: 40px;
-            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>✅ Recognition Results</h1>
+        <h1>🚨 Criminal Check Results</h1>
         
         <div class="stats">
-            <h2>Found {{ num_faces }} Face(s)</h2>
+            <h2>Faces Detected: {{ result.total_faces }}</h2>
         </div>
         
         {% if result_image %}
         <img src="{{ url_for('static', filename='results/' + result_image) }}" alt="Result" class="result-image">
         {% endif %}
         
-        {% if results %}
-            <ul class="face-list">
-                {% for face in results %}
-                    <li class="face-item">
-                        <div class="face-name">
-                            {% if face.name == "Unknown" %}
-                                ❓ {{ face.name }}
-                            {% else %}
-                                ✓ {{ face.name }}
-                            {% endif %}
+        {% if result.faces %}
+            {% for face in result.faces %}
+                {% if face.found %}
+                    <div class="criminal-card">
+                        <h2>⚠️ CRIMINAL IDENTIFIED</h2>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span class="info-value">{{ face.name }}</span>
                         </div>
-                        <div class="face-location">📍 {{ face.location }}</div>
-                    </li>
-                {% endfor %}
-            </ul>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Crime:</span>
+                            <span class="info-value">{{ face.crime }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Crime Details:</span>
+                            <span class="info-value">{{ face.crime_details }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Years in Prison:</span>
+                            <span class="info-value">{{ face.years_in_prison }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Status:</span>
+                            <span class="info-value">{{ face.status }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Nationality:</span>
+                            <span class="info-value">{{ face.nationality }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Location:</span>
+                            <span class="info-value">{{ face.location }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Description:</span>
+                            <span class="info-value">{{ face.description }}</span>
+                        </div>
+                        
+                        <div class="info-row">
+                            <span class="info-label">Confidence:</span>
+                            <span class="info-value">{{ "%.2f"|format(face.confidence * 100) }}%</span>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="unknown-card">
+                        <h2>✅ FACE DETECTED</h2>
+                        <p>NOT FOUND IN CRIMINAL DATABASE</p>
+                        <p style="margin-top: 10px; font-size: 0.9em;">This person is not registered as a criminal</p>
+                    </div>
+                {% endif %}
+            {% endfor %}
         {% else %}
-            <div class="no-faces">
-                <h3>No faces detected in this image</h3>
+            <div class="unknown-card">
+                <h2>No Faces Detected</h2>
+                <p>{{ result.message }}</p>
             </div>
         {% endif %}
         
         <div style="text-align: center;">
-            <a href="/" class="back-button">⬅️ Back to Upload</a>
+            <a href="/" class="back-button">⬅️ Back to Home</a>
         </div>
     </div>
 </body>

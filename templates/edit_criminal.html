@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Criminal - {{ criminal.name }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #1e3c72;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #1e3c72;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button, .back-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        button[type="submit"] {
+            background: #28a745;
+            color: white;
+        }
+        
+        button[type="submit"]:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .back-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .back-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Criminal: {{ criminal.name }}</h1>
+        
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('update_criminal_route', name=criminal.name) }}">
+            <div class="form-group">
+                <label>Name (Cannot be changed)</label>
+                <input type="text" value="{{ criminal.name }}" disabled>
+            </div>
+            
+            <div class="form-group">
+                <label>Crime</label>
+                <input type="text" name="crime" value="{{ criminal.crime }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Crime Details</label>
+                <textarea name="crime_details" required>{{ criminal.crime_details }}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>Years in Prison</label>
+                <input type="text" name="years_in_prison" value="{{ criminal.years_in_prison }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" required>
+                    <option value="Active" {% if criminal.status == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Imprisoned" {% if criminal.status == 'Imprisoned' %}selected{% endif %}>Imprisoned</option>
+                    <option value="Fugitive" {% if criminal.status == 'Fugitive' %}selected{% endif %}>Fugitive</option>
+                    <option value="Deceased" {% if criminal.status == 'Deceased' %}selected{% endif %}>Deceased</option>
+                    <option value="Released" {% if criminal.status == 'Released' %}selected{% endif %}>Released</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Nationality</label>
+                <input type="text" name="nationality" value="{{ criminal.nationality }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Location</label>
+                <input type="text" name="location" value="{{ criminal.location }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" required>{{ criminal.description }}</textarea>
+            </div>
+            
+            <div class="button-group">
+                <a href="{{ url_for('list_criminals') }}" class="back-btn">Cancel</a>
+                <button type="submit">Update Criminal</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
